@@ -13,23 +13,65 @@ type Task struct {
 	Priority string
 }
 
+var db *gorm.DB
+
 func main() {
+	var err error
+
 	dsn := "root:Password!@tcp(127.0.0.1:3306)/sakila?charset=utf8mb4&parseTime=True&loc=Local"
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	db.AutoMigrate(&Task{})
+	RetriveRecords()
+}
 
-	db.Create(&Task{Title: "Hello", Priority: "A"})
+func RetriveRecords() {
+	tasks := []Task{}
+	results := db.Find(&tasks)
+	// SELECT * FROM Task
 
-	var task Task
+	fmt.Println(results)
+	fmt.Println(tasks)
 
-	db.First(&task, 1)
+}
+
+func UpdateRecord() {
+
+}
+
+func CreateRecord() {
+	task := Task{
+		Title:    "Create",
+		Priority: "A",
+	}
+
+	db.Create(&task)
 
 	fmt.Println(task)
+}
 
+func CreateRecords() {
+
+	tasks := []Task{
+		{
+			Title:    "Batch Insert 1",
+			Priority: "A",
+		},
+		{
+			Title:    "Batch Insert 2",
+			Priority: "B",
+		},
+		{
+			Title:    "Batch Insert 3",
+			Priority: "C",
+		},
+	}
+
+	db.Create(&tasks)
+
+	fmt.Println(tasks)
 }
