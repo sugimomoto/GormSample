@@ -1,16 +1,36 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type Task struct {
 	gorm.Model
 	Title    string
 	Priority string
+}
+
+// Session Configuration
+type Session struct {
+	DryRun                   bool
+	PrepareStmt              bool
+	NewDB                    bool
+	SkipHooks                bool
+	SkipDefaultTransaction   bool
+	DisableNestedTransaction bool
+	AllowGlobalUpdate        bool
+	FullSaveAssociations     bool
+	QueryFields              bool
+	CreateBatchSize          int
+	Context                  context.Context
+	Logger                   logger.Interface
+	NowFunc                  func() time.Time
 }
 
 var db *gorm.DB
@@ -26,7 +46,14 @@ func main() {
 		return
 	}
 
-	RetriveRecords()
+	CheckStatement()
+}
+
+func CheckStatement() {
+
+	var task Task
+
+	fmt.Printf("%+v\n", task)
 }
 
 func RetriveRecords() {
@@ -40,7 +67,19 @@ func RetriveRecords() {
 }
 
 func UpdateRecord() {
+	var task Task
 
+	db.First(&task)
+
+	task.Title = "Update Title"
+
+	db.Save(task)
+	// UPDATE All column
+
+	db.First(&task, task.ID)
+	// SELECT * FROM task WHERE ID = XX
+
+	fmt.Printf("%+v\n", task)
 }
 
 func CreateRecord() {
@@ -51,7 +90,7 @@ func CreateRecord() {
 
 	db.Create(&task)
 
-	fmt.Println(task)
+	fmt.Printf("%+v\n", task)
 }
 
 func CreateRecords() {
@@ -73,5 +112,5 @@ func CreateRecords() {
 
 	db.Create(&tasks)
 
-	fmt.Println(tasks)
+	fmt.Printf("%+v\n", tasks)
 }
